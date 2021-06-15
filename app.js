@@ -20,14 +20,14 @@ app.use(express.json());
 
 
 //Route for handling questions asked by the client
-app.get('/ask', (req, res) => {
+app.get('/ask', authenticateToken, (req, res) => {
 
     //get question
     let question = req.query.q;
     let answer;
     //get answer of question
-    // let targetCharacter = req.prologConnection.targetCharacter;
-    
+    let targetCharacter = req.prologConnection.targetCharacter;
+
     if (question == targetCharacter['name']) {
         answer = "yes";
     }
@@ -45,11 +45,10 @@ app.get('/ask', (req, res) => {
 //Route for getting a JWT
 app.post('/auth', (req, res) => {
 
-    const connection = req.body.connectionID;
-    targetCharacter = dummyDB[Math.floor(Math.random()*dummyDB.length)];
+    const connectionID = req.body.connectionID;
     const prologConnection = {
-        targetCharacter: dummyDB[0],
-        connectionID: connection
+        targetCharacter: dummyDB[Math.floor(Math.random() * dummyDB.length)],
+        connectionID: connectionID
     }
 
     //Create and sign a token. The token would encapsulate the data of the connection, similar to a session, betweem the client and the server.
@@ -73,12 +72,15 @@ function authenticateToken(req, res, next) {
     //Following JWT authentication standards, the token is typically sent with the value of: "BEARER TOKEN",
     //This means that the token is the second 'word' in the authorization header value.
     //Split authorization header, and get the second value, which holds the token value.
-    const token = authHeader.split(' ')[1];
-
+    let token = authHeader.split(' ')[1];
     //If for some reason there is no token send in the request, send response with failure
     if (token == null) {
         return res.sendStatus(401);
     }
+
+    token = token.substring(0, 36) + "." + token.substring(36, token.length);
+    token = token.substring(0, 284) + "." + token.substring(284, token.length);
+    console.log(token);
 
     //Finally, we have a token. We now verify it.
     jwt.verify(token, process.env.ACCESS_SECRET_TOKEN, (err, data) => {
