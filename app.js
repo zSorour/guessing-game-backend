@@ -1,5 +1,8 @@
 const express = require('express');
+const cors = require('cors');
 const jwt = require('jsonwebtoken');
+
+const dummyDB = require('./dummyDB.js');
 
 //For using .env files and the process.env variable
 require('dotenv').config();
@@ -7,27 +10,35 @@ require('dotenv').config();
 const app = express();
 const port = 8080;
 
+app.use(cors());
+
+let targetCharacter;
+// app.use(cors());
+
 //Parse incoming request data (request body) in json format
 app.use(express.json());
 
 
 //Route for handling questions asked by the client
-app.get('/ask', authenticateToken, (req, res) => {
+app.get('/ask', (req, res) => {
 
     //get question
-    let question = req.body.question;
+    let question = req.query.q;
     let answer;
     //get answer of question
-    if (question === "has_hair") {
+    // let targetCharacter = req.prologConnection.targetCharacter;
+    
+    if (question == targetCharacter['name']) {
         answer = "yes";
     }
-    else if (question === "has_flaws") {
+    else if (targetCharacter[question]) {
+        answer = "yes";
+    }
+    else {
         answer = "no";
     }
-
-    res.json({
-        answer: answer
-    });
+    console.log(answer);
+    res.send(answer);
 });
 
 
@@ -35,9 +46,9 @@ app.get('/ask', authenticateToken, (req, res) => {
 app.post('/auth', (req, res) => {
 
     const connection = req.body.connectionID;
-
+    targetCharacter = dummyDB[Math.floor(Math.random()*dummyDB.length)];
     const prologConnection = {
-        targetCharacter: "Sayed",
+        targetCharacter: dummyDB[0],
         connectionID: connection
     }
 
@@ -66,21 +77,22 @@ function authenticateToken(req, res, next) {
 
     //If for some reason there is no token send in the request, send response with failure
     if (token == null) {
-        return res.sendStatus(401).send('unauthorized!!!');
+        return res.sendStatus(401);
     }
 
     //Finally, we have a token. We now verify it.
     jwt.verify(token, process.env.ACCESS_SECRET_TOKEN, (err, data) => {
         if (err) {
-            return res.send(403).send('invalid token');
+            return res.sendStatus(403);
         }
         //Since there is no error, I get the data that came from verifying the token and store it in the request variable
         //so that it can be accessed in the next request handler/middleware
-        req.data = data;
+        req.prologConnection = data;
+        console.log("authenticated");
         next();
     });
 }
 
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`)
-})
+});
