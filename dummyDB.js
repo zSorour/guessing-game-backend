@@ -63,7 +63,7 @@ const people = [
         oscar_2016: true
     },
     {
-        name: "ed_shearan",
+        name: "ed_sheeran",
         male: true,
         singer: true,
         british: true,

@@ -78,10 +78,6 @@ function authenticateToken(req, res, next) {
         return res.sendStatus(401);
     }
 
-    token = token.substring(0, 36) + "." + token.substring(36, token.length);
-    token = token.substring(0, 284) + "." + token.substring(284, token.length);
-    console.log(token);
-
     //Finally, we have a token. We now verify it.
     jwt.verify(token, process.env.ACCESS_SECRET_TOKEN, (err, data) => {
         if (err) {
