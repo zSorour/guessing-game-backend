@@ -48,7 +48,7 @@ app.post('/auth', (req, res) => {
     }
 
     //Create and sign a token. The token would encapsulate the data of the connection, similar to a session, betweem the client and the server.
-    const token = jwt.sign(prologConnection, process.env.ACCESS_SECRET_TOKEN);
+    const token = jwt.sign(prologConnection, `${process.env.ACCESS_SECRET_TOKEN}`);
     //Reply to the client with the generated token.
     res.json({ accessToken: token });
 });
