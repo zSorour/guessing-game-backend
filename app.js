@@ -12,9 +12,6 @@ const port = 8080;
 
 app.use(cors());
 
-let targetCharacter;
-// app.use(cors());
-
 //Parse incoming request data (request body) in json format
 app.use(express.json());
 
@@ -37,7 +34,6 @@ app.get('/ask', authenticateToken, (req, res) => {
     else {
         answer = "no";
     }
-    console.log(answer);
     res.send(answer);
 });
 
@@ -67,7 +63,7 @@ function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     if (!authHeader) {
         //If there is no authorization header in the request, send response with failure
-        return res.sendStatus(401).send('unauthorized!!!');
+        return res.sendStatus(401);
     }
     //Following JWT authentication standards, the token is typically sent with the value of: "BEARER TOKEN",
     //This means that the token is the second 'word' in the authorization header value.
@@ -86,11 +82,10 @@ function authenticateToken(req, res, next) {
         //Since there is no error, I get the data that came from verifying the token and store it in the request variable
         //so that it can be accessed in the next request handler/middleware
         req.prologConnection = data;
-        console.log("authenticated");
         next();
     });
 }
 
-app.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`)
+app.listen(process.env.PORT || port, () => {
+    console.log(`Server listening at http://localhost:${port}`);
 });
