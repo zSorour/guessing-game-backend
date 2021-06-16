@@ -75,7 +75,7 @@ function authenticateToken(req, res, next) {
     }
 
     //Finally, we have a token. We now verify it.
-    jwt.verify(token, process.env.ACCESS_SECRET_TOKEN, (err, data) => {
+    jwt.verify(token, `${process.env.ACCESS_SECRET_TOKEN}`, (err, data) => {
         if (err) {
             return res.sendStatus(403);
         }
